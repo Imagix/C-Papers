@@ -11,7 +11,7 @@ toc: true
 
 # Abstract
 
-This proposal is to add customization point for `std::at()`
+This proposal is to add a customization point object for `std::at()`
 which will forward to containers which have a member function `at()`.
 In addition this will also apply to arrays.
 
