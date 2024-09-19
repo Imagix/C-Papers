@@ -69,6 +69,47 @@ freestanding-deleted, just as `std::span::at()` is.
 #define __cpp_lib_at xxxxxxL
 ```
 
+# Example implementation
+These are only for demonstration purposes and are not
+intended to dictate implementation.
+
+## Case 1: Containers with `at()` member function(s)
+
+```cpp
+namespace std
+{
+    template <typename _Tp, typename... _Idxs>
+    constexpr decltype(auto) at(_Tp& coll, _Idxs&&... idxs)
+        requires requires(_Tp coll, _Idxs&&... idxs)
+            { coll.at(std::forward<_Idxs>(idxs)...); }
+    {
+        return coll.at(std::forward<_Idxs>(idxs)...);
+    }
+}
+```
+
+## Case 2: Arrays
+
+```cpp
+namespace std
+{
+    template <typename _Tp, size_t N>
+    constexpr auto at(_Tp (&array)[N], size_t idx) -> _Tp&
+    {
+        if (N <= idx)
+        {
+            throw std::out_of_range("generic at");
+        }
+
+        return array[idx];
+    }
+}
+```
+
+## Case 3: Custom overload
+
+There is no example implementation as this is user-supplied.
+
 # Questions
 
 1. Are we about to cause problems by introducing a `std::at`
