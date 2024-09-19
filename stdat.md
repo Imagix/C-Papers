@@ -120,11 +120,11 @@ ability to add new things.  Additionaly the problem with byte was
 that for at least one platform, they had defined a macro "byte"
 which caused the issue, and they resolved that issue.
 1. Do we want to have overloads to deal with containers that do
-not have an `at()` member function, but does have an `operator[]`
-and something that `std::size()` would work on?  This could allow
-`std::at()` to range-check these containers as well.  A concern I
-have is whether that container is guaranteed to start its subscripts
-at 0, or whether it is even an integral subscript.
+not have an `at()` member function, but does have a single-subscript
+`operator[]` and something that `std::size()` would work on?  This
+could allow `std::at()` to automatically range-check these containers
+as well.  A concern I have is whether that container is guaranteed to
+start its subscript at 0, or whether it is even an integral subscript.
 1. Do we want to acknowledge potentially multi-dimensional subscripting
 now, or should we defer that to a future paper when there is more demand?
 
