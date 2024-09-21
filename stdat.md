@@ -22,7 +22,7 @@ performing range-checked accesses to containers.  A number of existing
 containers have both an `operator[]` for unchecked accesses, as well as
 an `at()` member function for range-checked accesses which may throw an
 `std::out_of_range` exception.  It would be useful to be able to have
-an `at()` for user-declared types which may not have provded their own
+an `at()` for user-declared types which may not have provided their own
 as well as having range-checked accesses to arrays.  This facilitates
 generic programming with containers in the same manner that `std::begin()`
 does.
@@ -36,8 +36,7 @@ Initial revision.
 # Design
 
 Define a customization point object `std::at()` which may be used
-instead of calling a member-function `at()`.  This is a similar mechanism
-that which is already used for `std::begin()`.  
+instead of calling a member-function `at()`.
 
 Since C++23 `operator[]` can take any number of subscripts, it is reasonable
 to anticipate that user-defined classes will start to have a member function
@@ -76,33 +75,27 @@ intended to dictate implementation.
 ## Case 1: Containers with `at()` member function(s)
 
 ```cpp
-namespace std
+template <typename _Tp, typename... _Idxs>
+constexpr decltype(auto) at(_Tp& coll, _Idxs&&... idxs)
+    requires requires(_Tp coll, _Idxs&&... idxs)
+        { std::forward<_Tp>(coll).at(std::forward<_Idxs>(idxs)...); }
 {
-    template <typename _Tp, typename... _Idxs>
-    constexpr decltype(auto) at(_Tp& coll, _Idxs&&... idxs)
-        requires requires(_Tp coll, _Idxs&&... idxs)
-            { coll.at(std::forward<_Idxs>(idxs)...); }
-    {
-        return coll.at(std::forward<_Idxs>(idxs)...);
-    }
+    return std::forward<_Tp>(coll).at(std::forward<_Idxs>(idxs)...);
 }
 ```
 
 ## Case 2: Arrays
 
 ```cpp
-namespace std
+template <typename _Tp, size_t N>
+constexpr auto at(_Tp (&array)[N], size_t idx) -> _Tp&
 {
-    template <typename _Tp, size_t N>
-    constexpr auto at(_Tp (&array)[N], size_t idx) -> _Tp&
+    if (N <= idx)
     {
-        if (N <= idx)
-        {
-            throw std::out_of_range("generic at");
-        }
-
-        return array[idx];
+        throw std::out_of_range("generic at");
     }
+
+    return array[idx];
 }
 ```
 
